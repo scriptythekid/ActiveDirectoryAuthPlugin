@@ -90,6 +90,7 @@ class ADAuthStore(Component):
             success = self._bind_ad(dn, password) or False
         if success:
             msg += " Password Verified"
+	    success = True
         elif success is False:
             msg += " Password Failed"
         else:
