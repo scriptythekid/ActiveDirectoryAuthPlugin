@@ -126,6 +126,7 @@ class ADAuthStore(Component):
 
         try:
             l = ldap.initialize(ads)
+	    l.set_option(ldap.OPT_REFERRALS, 0)
         except:
             raise TracError('Unable to contact Active Directory >>>%s<<<' % ads)
 
