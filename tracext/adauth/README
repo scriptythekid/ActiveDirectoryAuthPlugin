@@ -1,0 +1,52 @@
+fork of ActiveDirectoryAuthPlugin for Trac by John Hampton <pacopablo@pacopablo.com>
+see http://trac-hacks.org/wiki/ActiveDirectoryAuthPlugin
+
+
+== Install ==
+
+==== Prerequisites ====
+
+You must install AccountManagerPlugin in order to use this plugin.  Python-LDAP is also required and can be downloaded [http://pypi.python.org/pypi/python-ldap/ here]
+
+==== Installation ====
+
+Follow the Trac documentation on how [http://trac.edgewall.org/search?q=TracPlugins to install Trac plugins]
+
+== Examples ==
+
+All config options go under the [account-manager] config heading.  Options for this module are:
+
+{{{
+  [account-manager]
+#to use this module with AccountManager, ADAuthStore must be enabled inside of AccountManager
+  password_store = ADAuthStore
+#define the Active Directory host address here.  A port other than default is set as
+#hostname:port
+  ad_server = adserver.example.com
+#the Active Directory's base DN to search from, this is likely just your domain
+  base_dn = DC=example,DC=com
+#the user/password to search active directory from, it must be a valid
+#username/password inside of active directory
+  bind_dn = ldapuser@example.com
+  bind_passwd = ldapuserpassword
+#the DN (distinguishing name) for the group that contains users that can login to Trac
+#if this isn't specified then any valid user in active directory is accepted
+  auth_group = CN=Alltechs,OU=Mail enabled groups,OU=Email,DC=serverplus,DC=com
+#the DN for the group that contains users that should have the TRAC_ADMIN
+#permission.  If this option is not given, no user groups will be give the
+#TRAC_ADMIN permission.  This this option is enabled you must specify the
+#UserExtensiblePermissionStore as the trac permission store, such as:
+#[trac]
+#permission_store = UserExtensiblePermissionStore
+  admin_group = CN=Administration,DC=example,DC=com
+
+  [trac]
+  permission_store = UserExtensiblePermissionStore
+
+  #new custom AD config stuff                                                                                                                 
+  #full path to your custom cacertfile(/selfsigned AD-SSLcert?) your ADserver's ssl cert was signed with   aka ' custom root certificate'     
+  custom_cacertfile = /etc/ssl/certs/vandor.crt                                                                                               
+  #                                                                                                                                           
+  ignoreunknowncertificate = False
+}}}
+
