@@ -30,8 +30,12 @@ class ADAuthStore(Component):
     bind_pw = Option('account-manager', 'bind_passwd', None, 'Password used when binding to Active Directory')
     auth_group = Option('account-manager', 'auth_group', None, 'DN of group containing valid users. If None, any AD user is valid')
     admin_group = Option('account-manager', 'admin_group', None, 'DN of group containing TRAC_ADMIN users')
+    customcacert = Option('account-manager', 'custom_cacertfile', None, 'Path of custom CACERTFILE for ldaps')
+    ignoreunknowncertificate = False
 
-
+    def __init__(self):
+      self.ignoreunknowncertificate = self.env.config.getbool('account-manager', 'ignoreunknowncertificate')
+    
     # IPasswordStore
     def config_key(self):
         """Deprecated"""
@@ -119,12 +123,21 @@ class ADAuthStore(Component):
         user = user_dn or self.bind_dn
         password = passwd or self.bind_pw
 
-        if not self.ads.lower().startswith('ldap://'):
+	if not self.ads.lower().startswith('ldap://') and not self.ads.lower().startswith('ldaps://'):
             ads = 'ldap://%s' % self.ads
         else:
             ads = self.ads
 
         try:
+	    #ldaps support
+	    if ads.lower().startswith('ldaps://'):
+	      if self.ignoreunknowncertificate == True:
+		self.log.debug('ignoring unknown certs...')
+		ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
+	      if self.customcacert:
+		self.log.debug('adding custom cacertfile: %s' % self.customcacert)
+		ldap.set_option(ldap.OPT_X_TLS_CACERTFILE,self.customcacert)
+
             l = ldap.initialize(ads)
 	    l.set_option(ldap.OPT_REFERRALS, 0)
         except:
